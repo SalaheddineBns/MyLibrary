@@ -3,72 +3,75 @@ import { Redirect, Route, Switch, useHistory } from 'react-router-dom';
 import './App.css';
 import { BookCheckoutPage } from './layouts/BookCheckoutPage/BookCheckoutPage';
 import { HomePage } from './layouts/HomePage/HomePage';
-import { Footer } from './layouts/NavbarAndFooter/Footer'; 
+import { Footer } from './layouts/NavbarAndFooter/Footer';
 import { Navbar } from './layouts/NavbarAndFooter/Navbar';
 import { SearchBooksPage } from './layouts/SearchBooksPage/SearchBooksPage';
-import { oktaConfig } from './lib/oktaConfig';
-import { OktaAuth, toRelativeUrl } from '@okta/okta-auth-js';
-import { LoginCallback, SecureRoute, Security } from '@okta/okta-react';
-import LoginWidget from './Auth/LoginWidget';
 import { ReviewListPage } from './layouts/BookCheckoutPage/ReviewListPage/ReviewListPage';
 import { ShelfPage } from './layouts/ShelfPage/ShelfPage';
 import { MessagesPage } from './layouts/MessagesPage/MessagesPage';
 import { ManageLibraryPage } from './layouts/ManageLibraryPage/ManageLibraryPage';
-import { PaymentPage } from './layouts/PaymentPage/PaymentPage';
+import { auth0Config } from './lib/auth0Config';
+import LoginPage from './Auth/LoginPage';
+import { Auth0Provider, withAuthenticationRequired} from '@auth0/auth0-react';
 
-const oktaAuth = new OktaAuth(oktaConfig);
-
-export const App = () => {
-  const customAuthHandler = () => {
-    history.push('/login');
-  }
-
+const Auth0ProviderWithHistory = ({ children }: { children: React.ReactNode }) => {
   const history = useHistory();
 
-
-  const restoreOriginalUri = async (_oktaAuth: any, originalUri: any) => {
-    history.replace(toRelativeUrl(originalUri || '/', window.location.origin));
+  const onRedirectCallback = (appState: any) => {
+    history.push(appState?.returnTo || "/home");
   };
 
   return (
+    <Auth0Provider
+      domain={auth0Config.issuer}
+      clientId={auth0Config.clientId}
+      authorizationParams={{
+        redirect_uri: auth0Config.redirectUri,
+        audience: auth0Config.audience,
+        scope: auth0Config.scope,
+      }} 
+       onRedirectCallback={onRedirectCallback}
+    >
+      {children}
+    </Auth0Provider>
+  );
+};
+
+const SecureRoute = ({ component, path, ...args }: { component: React.ComponentType<any>, path: string }) => (
+  <Route path={path} component={withAuthenticationRequired(component)} {...args} />
+);
+
+export const App = () => {
+
+  return (
     <div className='d-flex flex-column min-vh-100'>
-      <Security oktaAuth={oktaAuth} restoreOriginalUri={restoreOriginalUri} onAuthRequired={customAuthHandler}>
-
-        <Navbar />
-        <div className='flex-grow-1'>
-          <Switch>
-            <Route path='/' exact>
-              <Redirect to="/home" />
-            </Route>
-            <Route path='/home' >
-              <HomePage />
-            </Route>
-            <Route path='/search'>
-              <SearchBooksPage />
-            </Route>
-            <Route path='/reviewsList/:bookId'>
-                   <ReviewListPage/>
-            </Route>
-            <Route path='/checkout/:bookId'>
-              <BookCheckoutPage />
-            </Route>
-            <Route path='/login' render={
-            () => <LoginWidget config={oktaConfig} /> 
-            } 
-          />
-          <Route path='/login/callback' component={LoginCallback} />
-          <SecureRoute path='/shelf'> <ShelfPage /> </SecureRoute>
-          <SecureRoute path='/messages'> <MessagesPage /> </SecureRoute>
-          <SecureRoute path='/admin'> <ManageLibraryPage/></SecureRoute>
-          <SecureRoute path='/fees'> <PaymentPage/></SecureRoute>
-
-          </Switch>
-        </div>
-        <Footer />
-      </Security>
+      <Auth0ProviderWithHistory>
+      <Navbar />
+      <div className='flex-grow-1'>
+        <Switch>
+          <Route path='/' exact>
+            <Redirect to='/home' />
+          </Route>
+          <Route path='/home'>
+            <HomePage />
+          </Route>
+          <Route path='/search'>
+            <SearchBooksPage />
+          </Route>
+          <Route path='/reviewlist/:bookId'>
+            <ReviewListPage/>
+          </Route>
+          <Route path='/checkout/:bookId'>
+            <BookCheckoutPage/>
+          </Route>
+          <Route path='/login' render={() => <LoginPage />} />
+          <SecureRoute path='/shelf' component={ShelfPage} />
+          <SecureRoute path='/messages' component={MessagesPage} />
+          <SecureRoute path='/admin' component={ManageLibraryPage} />
+        </Switch>
+      </div>
+      <Footer />
+      </Auth0ProviderWithHistory>
     </div>
-
   );
 }
-
-

@@ -3,8 +3,8 @@ import BookModel from "../../models/BookModel";
 import { LeaveAReview } from "../Utils/LeaveAReview";
 
 
-export const CheckoutAndReviewBox: React.FC<{
-    book: BookModel | undefined, mobile: boolean, currenLoansCount: number,
+export const CheckoutAndReviewBook: React.FC<{
+    book: BookModel | undefined, mobile: boolean, currentLoansCount: number,
     isAuthenticated: any, isCheckedOut: boolean, checkoutBook: any, isReviewLeft: Boolean,
     submitReview:any
 }> = (props) => {
@@ -12,7 +12,7 @@ export const CheckoutAndReviewBox: React.FC<{
     const renderButton = () => {
 
         if (props.isAuthenticated) {
-            if (!props.isCheckedOut && props.currenLoansCount < 5) {
+            if (!props.isCheckedOut && props.currentLoansCount < 5) {
                 return <button onClick={() => props.checkoutBook()} className="btn btn-success btn-lg">Checkout</button>
             }
             else if (props.isCheckedOut) {
@@ -45,7 +45,7 @@ export const CheckoutAndReviewBox: React.FC<{
             <div className='card-body container'>
                 <div className='mt-3'>
                     <p>
-                        <b>{props.currenLoansCount}/5 </b>
+                        <b>{props.currentLoansCount}/5 </b>
                         books checked out
                     </p>
                     <hr />

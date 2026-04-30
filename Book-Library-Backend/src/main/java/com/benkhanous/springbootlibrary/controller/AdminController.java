@@ -2,55 +2,73 @@ package com.benkhanous.springbootlibrary.controller;
 
 import com.benkhanous.springbootlibrary.requestmodels.AddBookRequest;
 import com.benkhanous.springbootlibrary.service.AdminService;
-import com.benkhanous.springbootlibrary.service.BookService;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.*;
-import utils.ExtractJWT;
 
-@CrossOrigin("https://localhost:3000")
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.oauth2.jwt.Jwt;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
+
+@CrossOrigin({"http://localhost:3000", "https://effective-giggle-7xgg7gvx64gcj69-3000.app.github.dev"})
 @RestController
-@RequestMapping("api/admin")
+@RequestMapping("/api/admin")
 public class AdminController {
 
     private AdminService adminService;
 
     @Autowired
-    public AdminController(AdminService adminService){
-        this.adminService=adminService;
+    public AdminController(AdminService adminService) {
+        this.adminService = adminService;
     }
+
+    @PutMapping("/secure/increase/book/quantity")
+    public void increaseBookQuantity(@AuthenticationPrincipal Jwt jwt,
+                                     @RequestParam Long bookId) throws Exception {
+
+        List<String> roles = jwt.getClaimAsStringList("https://salaheddine-library.com/roles");
+        String admin = roles != null && !roles.isEmpty() ? roles.get(0) : null;
+
+        if (admin == null || !admin.equals("admin")) {
+            throw new Exception("Administration page only");
+        }
+        adminService.increaseBookQuantity(bookId);
+    }
+
+    @PutMapping("/secure/decrease/book/quantity")
+    public void decreaseBookQuantity(@AuthenticationPrincipal Jwt jwt,
+                                     @RequestParam Long bookId) throws Exception {
+        List<String> roles = jwt.getClaimAsStringList("https://salaheddine-library.com/roles");
+        String admin = roles != null && !roles.isEmpty() ? roles.get(0) : null;
+
+        if (admin == null || !admin.equals("admin")) {
+            throw new Exception("Administration page only");
+        }
+        adminService.decreaseBookQuantity(bookId);
+    }
+
     @PostMapping("/secure/add/book")
-    public void postBook(@RequestHeader(value = "Authorization") String token,@RequestBody AddBookRequest addBookRequest) throws Exception
-    {
-        String admin= ExtractJWT.payloadJWTExtraction(token,"\"userType\"");
-        if(admin==null || !admin.equals("admin")){
+    public void postBook(@AuthenticationPrincipal Jwt jwt,
+                         @RequestBody AddBookRequest addBookRequest) throws Exception {
+        List<String> roles = jwt.getClaimAsStringList("https://salaheddine-library.com/roles");
+        String admin = roles != null && !roles.isEmpty() ? roles.get(0) : null;
+
+        if (admin == null || !admin.equals("admin")) {
             throw new Exception("Administration page only");
         }
         adminService.postBook(addBookRequest);
     }
 
-    @PutMapping("/secure/increase/book/quantity")
-    public void increaseBookQuantity(@RequestHeader(value="Authorization") String token,@RequestParam Long bookId) throws Exception {
-        String admin= ExtractJWT.payloadJWTExtraction(token,"\"userType\"");
-        if(admin==null || !admin.equals("admin")){
-            throw new Exception("Admnistration page only");
-        }
-        adminService.increaseBookQuantity(bookId);
-    }
-    @PutMapping("/secure/decrease/book/quantity")
-    public void decreaseBookQuantity(@RequestHeader(value = "Authorization")String token,@RequestParam Long bookId) throws Exception{
-        String admin=ExtractJWT.payloadJWTExtraction(token,"\"userType\"");
-        if(admin==null || !admin.equals("admin")){
-            throw new Exception("Administration access only");
-        }
-        adminService.decreaseBookQuantity(bookId);
+    @DeleteMapping("/secure/delete/book")
+    public void deleteBook(@AuthenticationPrincipal Jwt jwt,
+                           @RequestParam Long bookId) throws Exception {
+        List<String> roles = jwt.getClaimAsStringList("https://salaheddine-library.com/roles");
+        String admin = roles != null && !roles.isEmpty() ? roles.get(0) : null;
 
-    }
-    @DeleteMapping("secure/delete/book")
-    public void deleteBook(@RequestHeader(value = "Authorization") String token,@RequestParam Long bookId) throws Exception{
-        String admin=ExtractJWT.payloadJWTExtraction(token,"\"userType\"");
-        if(admin == null || !admin.equals("admin")){
-            throw new Exception("Administration Page only ");
+        if (admin == null || !admin.equals("admin")) {
+            throw new Exception("Administration page only");
         }
-        adminService.deleteBookService(bookId);
+        adminService.deleteBook(bookId);
     }
+
 }

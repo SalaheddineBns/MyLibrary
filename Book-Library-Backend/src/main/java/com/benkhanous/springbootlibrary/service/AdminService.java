@@ -49,7 +49,7 @@ public class AdminService {
         bookRepository.save(book.get());
     }
 
-    public void deleteBookService(Long bookId) throws Exception{
+    public void deleteBook(Long bookId) throws Exception{
         // darouri
         Optional<Book> book=bookRepository.findById(bookId);
         if(!book.isPresent()){

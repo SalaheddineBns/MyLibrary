@@ -1,23 +1,24 @@
-import { useOktaAuth } from "@okta/okta-react"
-import { useState } from "react";
-import MessageModel from "../../../models/MessageModel";
+import { useState } from 'react';
+import MessageModel from '../../../models/MessageModel';
+import { useAuth0 } from '@auth0/auth0-react';
+
 export const PostNewMessage = () => {
     
-    const { authState } = useOktaAuth();
+    const { isAuthenticated, getAccessTokenSilently } = useAuth0();
     const [title, setTitle] = useState('');
     const [question, setQuestion] = useState('');
     const [displayWarning, setDisplayWarning] = useState(false);
     const [displaySuccess, setDisplaySuccess] = useState(false);
 
-
     async function submitNewQuestion() {
-        const url = `${process.env.REACT_APP_API}/messages/secure/add/message`;
-        if (authState?.isAuthenticated && title !== '' && question !== '') {
+        const url = `http://localhost:8080/api/messages/secure/add/message`;
+        const accessToken = await getAccessTokenSilently();
+        if (isAuthenticated && title !== '' && question !== '') {
             const messageRequestModel: MessageModel = new MessageModel(title, question);
             const requestOptions = {
                 method: 'POST',
                 headers: {
-                    Authorization: `Bearer ${authState?.accessToken?.accessToken}`,
+                    Authorization: `Bearer ${accessToken}`,
                     'Content-Type': 'application/json'
                 },
                 body: JSON.stringify(messageRequestModel)
@@ -72,7 +73,7 @@ export const PostNewMessage = () => {
                         </textarea>
                     </div>
                     <div>
-                        <button type='button' className='btn btn-primary mt-3' onClick={submitNewQuestion} >
+                        <button type='button' className='btn btn-primary mt-3' onClick={submitNewQuestion}>
                             Submit Question
                         </button>
                     </div>

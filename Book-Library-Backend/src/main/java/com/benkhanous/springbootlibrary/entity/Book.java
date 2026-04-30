@@ -1,7 +1,7 @@
 package com.benkhanous.springbootlibrary.entity;
 
 import lombok.Data;
-import javax.persistence.*;
+import jakarta.persistence.*;
 
 @Entity
 @Table(name = "book")
