@@ -1,5 +1,5 @@
 import { useAuth0 } from "@auth0/auth0-react";
-import { CardElement, Elements, useElements, useStripe } from "@stripe/react-stripe-js";
+import { CardElement, useElements, useStripe } from "@stripe/react-stripe-js";
 import { useEffect, useState } from "react";
 import { SpinnerLoading } from "../Utils/SpinnerLoading";
 import { Link } from 'react-router-dom';
@@ -40,7 +40,7 @@ export const PaymentPage = () => {
             setLoadingFees(false)
             setHttpError(error.message)
         })
-    }, [isAuthenticated]);
+    }, [isAuthenticated, getAccessTokenSilently, user?.email]);
 
     const elements = useElements();
     const stripe = useStripe();

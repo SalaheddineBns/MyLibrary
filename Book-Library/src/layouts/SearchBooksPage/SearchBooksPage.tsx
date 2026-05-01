@@ -66,7 +66,7 @@ export const SearchBooksPage = () => {
             setHttpError(error.message);
         })
         window.scrollTo(0, 0)
-    }, [currentPage, searchUrl])
+    }, [currentPage, searchUrl, booksPerPage])
 
     if (isLoading) {
         return (<div>
@@ -136,31 +136,11 @@ export const SearchBooksPage = () => {
                                     {categorySelection}
                                 </button>
                                 <ul className='dropdown-menu' aria-labelledby='dropdownMenuButton1'>
-                                    <li onClick={()=>{categoryField('All')}}>
-                                        <a className='dropdown-item' href='#'>
-                                            All
-                                        </a>
-                                    </li>
-                                    <li onClick={()=>{categoryField('FE')}}>
-                                        <a className='dropdown-item' href='#'>
-                                            Front End
-                                        </a>
-                                    </li>
-                                    <li onClick={()=>{categoryField('BE')}}>
-                                        <a className='dropdown-item' href='#'>
-                                            Back End
-                                        </a>
-                                    </li>
-                                    <li onClick={()=>{categoryField('DATA')}}>
-                                        <a className='dropdown-item' href='#'>
-                                            Data
-                                        </a>
-                                    </li>
-                                    <li onClick={()=>{categoryField('DEVOPS')}}>
-                                        <a className='dropdown-item' href='#'>
-                                            DevOps
-                                        </a>
-                                    </li>
+                                    <li><button className='dropdown-item' onClick={() => categoryField('All')}>All</button></li>
+                                    <li><button className='dropdown-item' onClick={() => categoryField('FE')}>Front End</button></li>
+                                    <li><button className='dropdown-item' onClick={() => categoryField('BE')}>Back End</button></li>
+                                    <li><button className='dropdown-item' onClick={() => categoryField('DATA')}>Data</button></li>
+                                    <li><button className='dropdown-item' onClick={() => categoryField('DEVOPS')}>DevOps</button></li>
                                 </ul>
                             </div>
                         </div>
@@ -181,10 +161,9 @@ export const SearchBooksPage = () => {
                               <h3>
                                 Can't Find what you are looking for ? 
                               </h3>
-                              <a type="button" className="btn main-color btn-md px-4 me-md-2 fw-bold text-white"
-                              href="#">
+                              <button type="button" className="btn main-color btn-md px-4 me-md-2 fw-bold text-white">
                                 Library Services
-                              </a>
+                              </button>
                         </div>
                     }
 
