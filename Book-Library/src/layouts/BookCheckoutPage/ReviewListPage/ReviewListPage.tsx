@@ -20,7 +20,7 @@ export const ReviewListPage = () => {
 
 
     useEffect(() => {
-        console.log(window.location.pathname)
+
         const fetchBookReviews = async () => {
             const reviewUrl: string = `${process.env.REACT_APP_API}/reviews/search/findByBookId?bookId=${bookId}&page=${currentPage - 1}&size=${reviewsPerPage}`
             const response = await fetch(reviewUrl)
@@ -55,7 +55,7 @@ export const ReviewListPage = () => {
             setHttpError(error.message)
         })
 
-    }, [currentPage])
+    }, [currentPage, bookId, reviewsPerPage])
 
 
     if (isLoading) {
