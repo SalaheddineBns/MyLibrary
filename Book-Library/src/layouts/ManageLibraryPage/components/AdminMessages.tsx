@@ -58,7 +58,7 @@ export const AdminMessages = () => {
             setHttpError(error.message)
         })
         window.scrollTo(0, 0)
-    }, [isAuthenticated, currentPage, btnSubmit]);
+    }, [isAuthenticated, currentPage, btnSubmit, getAccessTokenSilently, messagesPerPage]);
 
     if (isLoadingMessages) {
         return <SpinnerLoading />

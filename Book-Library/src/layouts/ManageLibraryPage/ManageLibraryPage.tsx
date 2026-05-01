@@ -95,6 +95,3 @@ const { getIdTokenClaims } = useAuth0();
     );
 }
 
-function getIdTokenClaims() {
-    throw new Error('Function not implemented.');
-}
