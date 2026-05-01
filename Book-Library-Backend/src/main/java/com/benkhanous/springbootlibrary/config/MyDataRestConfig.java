@@ -14,7 +14,7 @@ import org.springframework.web.servlet.config.annotation.CorsRegistry;
 
 @Configuration
 public class MyDataRestConfig implements RepositoryRestConfigurer {
-   public String theAllowedOrigins="https://localhost:3000";
+   public String theAllowedOrigins="http://localhost:3000";
 
    public void configureRepositoryRestConfiguration(RepositoryRestConfiguration config, CorsRegistry cors){
        HttpMethod[] theUnsupportedActions={HttpMethod.POST,HttpMethod.PATCH,HttpMethod.DELETE,HttpMethod.PUT};
@@ -29,7 +29,10 @@ public class MyDataRestConfig implements RepositoryRestConfigurer {
 
 
        cors.addMapping(config.getBasePath()+"/**")
-               .allowedOrigins(theAllowedOrigins);
+               .allowedOrigins(theAllowedOrigins)
+               .allowedMethods("GET", "POST", "PUT", "DELETE", "OPTIONS")
+               .allowedHeaders("*")
+               .allowCredentials(true);
 
     }
 

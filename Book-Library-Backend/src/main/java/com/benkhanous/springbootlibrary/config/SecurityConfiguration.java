@@ -8,6 +8,11 @@ import org.springframework.security.config.annotation.web.configurers.AbstractHt
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.web.accept.ContentNegotiationStrategy;
 import org.springframework.web.accept.HeaderContentNegotiationStrategy;
+import org.springframework.web.cors.CorsConfiguration;
+import org.springframework.web.cors.CorsConfigurationSource;
+import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
+
+import java.util.List;
 
 import static org.springframework.security.config.Customizer.withDefaults;
 
@@ -15,26 +20,37 @@ import static org.springframework.security.config.Customizer.withDefaults;
 public class SecurityConfiguration {
 
     @Bean
+    public CorsConfigurationSource corsConfigurationSource() {
+        CorsConfiguration config = new CorsConfiguration();
+        config.setAllowedOrigins(List.of("http://localhost:3000"));
+        config.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS"));
+        config.setAllowedHeaders(List.of("*"));
+        config.setAllowCredentials(true);
+
+        UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
+        source.registerCorsConfiguration("/**", config);
+        return source;
+    }
+
+    @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
 
-        // Protect endpoints at /api/<type>/secure
         http.authorizeHttpRequests(configurer ->
                 configurer
                         .requestMatchers("/api/books/secure/**",
                                 "/api/reviews/secure/**",
                                 "/api/messages/secure/**",
-                                "/api/admin/secure/**")
+                                "/api/admin/secure/**",
+                                "/api/payment/secure/**",
+                                "/api/payments/secure/**")
                         .authenticated().anyRequest().permitAll())
                 .oauth2ResourceServer((oauth2) -> oauth2.jwt(withDefaults()))
-                .cors(withDefaults());
+                .cors(cors -> cors.configurationSource(corsConfigurationSource()));
 
-//        Disable Cross Site Request Forgery
         http.csrf(AbstractHttpConfigurer::disable);
-        // Add content negotiation strategy
         http.setSharedObject(ContentNegotiationStrategy.class,
                 new HeaderContentNegotiationStrategy());
 
-        // Force a non-empty response body for 401's to make the response friendly
         Okta.configureResourceServer401ResponseBody(http);
 
         return http.build();

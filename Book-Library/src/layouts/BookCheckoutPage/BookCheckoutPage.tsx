@@ -34,11 +34,13 @@ export const BookCheckoutPage = () => {
     const [isCheckedOut, setIsCheckedOut] = useState(false);
     const [isLoadingBookCheckedOut, setIsLoadingBookCheckedOut] = useState(true);
 
+    const [checkoutError, setCheckoutError] = useState<string | null>(null);
+
     const bookId = (window.location.pathname).split('/')[2];
 
     useEffect(() => {
         const fetchBook = async () => {
-            const baseUrl: string = `${process.env.REACT_APP_API}/api/books/${bookId}`;
+            const baseUrl: string = `${process.env.REACT_APP_API}/books/${bookId}`;
 
             const response = await fetch(baseUrl);
 
@@ -70,7 +72,7 @@ export const BookCheckoutPage = () => {
 
     useEffect(() => {
         const fetchBookReviews = async () => {
-            const reviewUrl: string = `http://localhost:8080/api/reviews/search/findByBookId?bookId=${bookId}`;
+            const reviewUrl: string = `${process.env.REACT_APP_API}/reviews/search/findByBookId?bookId=${bookId}`;
 
             const responseReviews = await fetch(reviewUrl);
 
@@ -117,7 +119,7 @@ export const BookCheckoutPage = () => {
         const fetchUserReviewBook = async () => {
             if (isAuthenticated) {
                 const accessToken = await getAccessTokenSilently();
-                const url = `http://localhost:8080/api/reviews/secure/user/book?bookId=${bookId}`;
+                const url = `${process.env.REACT_APP_API}/reviews/secure/user/book?bookId=${bookId}`;
                 const requestOptions = {
                     method: 'GET',
                     headers: {
@@ -144,7 +146,7 @@ export const BookCheckoutPage = () => {
         const fetchUserCurrentLoansCount = async () => {
             if (isAuthenticated) {
                 const accessToken = await getAccessTokenSilently();
-                const url = `http://localhost:8080/api/books/secure/currentloans/count`;
+                const url = `${process.env.REACT_APP_API}/books/secure/currentloans/count`;
                 const requestOptions = {
                     method: 'GET',
                     headers: { 
@@ -171,7 +173,7 @@ export const BookCheckoutPage = () => {
         const fetchUserCheckedOutBook = async () => {
             if (isAuthenticated) {
                 const accessToken = await getAccessTokenSilently();
-                const url = `http://localhost:8080/api/books/secure/ischeckedout/byuser?bookId=${bookId}`;
+                const url = `${process.env.REACT_APP_API}/books/secure/ischeckedout/byuser?bookId=${bookId}`;
                 const requestOptions = {
                     method: 'GET',
                     headers: {
@@ -212,7 +214,7 @@ export const BookCheckoutPage = () => {
 
     async function checkoutBook() {
         const accessToken = await getAccessTokenSilently();
-        const url = `http://localhost:8080/api/books/secure/checkout?bookId=${book?.id}`;
+        const url = `${process.env.REACT_APP_API}/books/secure/checkout?bookId=${book?.id}`;
         const requestOptions = {
             method: 'PUT',
             headers: {
@@ -222,8 +224,14 @@ export const BookCheckoutPage = () => {
         };
         const checkoutResponse = await fetch(url, requestOptions);
         if (!checkoutResponse.ok) {
-            throw new Error('Something went wrong!');
+            if (checkoutResponse.status === 403) {
+                setCheckoutError('Checkout blocked: you have an overdue book and/or outstanding fees. Go to the Shelf page to return overdue books, or to the Fees page to pay any dollar fees.');
+            } else {
+                setCheckoutError('Something went wrong. Please try again.');
+            }
+            return;
         }
+        setCheckoutError(null);
         setIsCheckedOut(true);
     }
 
@@ -234,7 +242,7 @@ export const BookCheckoutPage = () => {
         }
 
         const reviewRequestModel = new ReviewRequestModel(starInput, bookId, reviewDescription);
-        const url = `http://localhost:8080/api/reviews/secure`;
+        const url = `${process.env.REACT_APP_API}/reviews/secure`;
         const accessToken = await getAccessTokenSilently();
         const requestOptions = {
             method: 'POST',
@@ -273,7 +281,7 @@ export const BookCheckoutPage = () => {
                     </div>
                     <CheckoutAndReviewBook book={book} mobile={false} currentLoansCount={currentLoansCount} 
                         isAuthenticated={isAuthenticated} isCheckedOut={isCheckedOut} 
-                        checkoutBook={checkoutBook} isReviewLeft={isReviewLeft} submitReview={submitReview}/>
+                        checkoutBook={checkoutBook} isReviewLeft={isReviewLeft} submitReview={submitReview} checkoutError={checkoutError}/>
                 </div>
                 <hr />
                 <LatestReviews reviews={reviews} bookId={book?.id} mobile={false} />
@@ -297,7 +305,7 @@ export const BookCheckoutPage = () => {
                 </div>
                 <CheckoutAndReviewBook book={book} mobile={true} currentLoansCount={currentLoansCount} 
                     isAuthenticated={isAuthenticated} isCheckedOut={isCheckedOut} 
-                    checkoutBook={checkoutBook} isReviewLeft={isReviewLeft} submitReview={submitReview}/>
+                    checkoutBook={checkoutBook} isReviewLeft={isReviewLeft} submitReview={submitReview} checkoutError={checkoutError}/>
                 <hr />
                 <LatestReviews reviews={reviews} bookId={book?.id} mobile={true} />
             </div>

@@ -7,10 +7,11 @@ import com.stripe.model.PaymentIntent;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.web.bind.annotation.*;
-import utils.ExtractJWT;
 
-@CrossOrigin("https://localhost:3000")
+@CrossOrigin("http://localhost:3000")
 @RestController
 @RequestMapping("/api/payment/secure")
 public class PaymentController {
@@ -29,9 +30,9 @@ public class PaymentController {
     }
 
     @PutMapping("/payment-complete")
-    public ResponseEntity<String> stripePaymentComplete(@RequestHeader(value = "Authorization") String token) throws Exception{
-        String userEmail= ExtractJWT.payloadJWTExtraction(token,"\"sub\"");
-        if(userEmail==null){
+    public ResponseEntity<String> stripePaymentComplete(@AuthenticationPrincipal Jwt jwt) throws Exception {
+        String userEmail = jwt.getClaim("email");
+        if (userEmail == null) {
             throw new Exception("user email is missing");
         }
         return paymentService.stripePayment(userEmail);

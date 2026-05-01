@@ -6,7 +6,7 @@ import { BrowserRouter } from 'react-router-dom';
 import { loadStripe } from '@stripe/stripe-js';
 import { Elements } from '@stripe/react-stripe-js';
 
-const stripePromise = loadStripe('pk_test_51OAh7bHE61o1l2tRUi38tNCzzSrylheSw2ARWVNiNaFJTaUlbamKSm9YkW03SGBmU17O0FAWeLtyApRkNOHj5XVS00peBFqkLH') // publishable key
+const stripePromise = loadStripe('pk_test_51TSElRH3W5FHAEhzlM2jbYWteFXOji8BxAvQHpPMbshTARY3VBtPHr4L719miVAFXXUTTzPXypexVwnxTML9SvbW007gH5YzWf') // publishable key
 
 const root = ReactDOM.createRoot(
   document.getElementById('root') as HTMLElement

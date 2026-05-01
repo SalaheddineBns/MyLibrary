@@ -30,9 +30,13 @@ export const Navbar = () => {
     logout({ logoutParams: { returnTo: window.location.origin } })
   };
 
-  const handleLogin =  () => {
-     loginWithRedirect();
-    window.location.assign("/");
+  const handleLogin = async () => {
+    console.log('handleLogin called');
+    try {
+      await loginWithRedirect();
+    } catch (e) {
+      console.error('loginWithRedirect error:', e);
+    }
   };
 
   console.log("isAuthenticated: ", isAuthenticated);
@@ -61,7 +65,11 @@ export const Navbar = () => {
                 <NavLink className='nav-link' to='/shelf'>Shelf</NavLink>
               </li>
             }
-            
+            {isAuthenticated &&
+              <li className='nav-item'>
+                <NavLink className='nav-link' to='/fees'>Fees</NavLink>
+              </li>
+            }
             {isAuthenticated && roles?.includes('admin') &&
               <li className='nav-item'>
                 <NavLink className='nav-link' to='/admin'>Admin</NavLink>

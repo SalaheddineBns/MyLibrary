@@ -1,4 +1,4 @@
-import { useOktaAuth } from "@okta/okta-react"
+import { useAuth0 } from "@auth0/auth0-react"
 import { useEffect, useState } from "react"
 import AdminMessageRequest from "../../../models/AdminMessageRequest";
 import MessageModel from "../../../models/MessageModel";
@@ -9,7 +9,7 @@ import { AdminMessage } from "./AdminMessage";
 //the first thing  
 
 export const AdminMessages = () => {
-    const { authState } = useOktaAuth();
+    const { isAuthenticated, getAccessTokenSilently } = useAuth0();
 
     const [isLoadingMessages, setIsLoadingMessages] = useState(true)
     const [httpError, setHttpError] = useState(null)
@@ -21,19 +21,19 @@ export const AdminMessages = () => {
     //Pagination
     const [currentPage, setCurrentPage] = useState(1);
     const [totalPages, setTotalPages] = useState(0)
-    console.log(authState)
-    // Recall useEffect 
+    // Recall useEffect
     const [btnSubmit, setBtnSubmit] = useState(false)
 
     useEffect(() => {
         const fetchUserMessages = async () => {
-            if (authState && authState.isAuthenticated) {
-                const url = `${process.env.REACT_APP_API}/messages/search/findByClosed/?closed=false&page=${currentPage - 1}&size=${messagesPerPage}`;
+            if (isAuthenticated) {
+                const accessToken = await getAccessTokenSilently();
+                const url = `${process.env.REACT_APP_API}/messages/search/findByClosed?closed=false&page=${currentPage - 1}&size=${messagesPerPage}`;
                 const requestOptions = {
                     method: 'GET',
                     headers:
                     {
-                        Authorization: `Bearer ${authState?.accessToken?.accessToken}`,
+                        Authorization: `Bearer ${accessToken}`,
                         'Content-type': 'application/json'
                     }
                 }
@@ -58,7 +58,7 @@ export const AdminMessages = () => {
             setHttpError(error.message)
         })
         window.scrollTo(0, 0)
-    }, [authState, currentPage, btnSubmit]);
+    }, [isAuthenticated, currentPage, btnSubmit]);
 
     if (isLoadingMessages) {
         return <SpinnerLoading />
@@ -73,12 +73,13 @@ export const AdminMessages = () => {
 
     async function submitResponseToQuestion(id: number, response: string) {
         const url = `${process.env.REACT_APP_API}/messages/secure/admin/message`;
-        if (authState && authState?.isAuthenticated && id !== null && response !== '') {
+        if (isAuthenticated && id !== null && response !== '') {
+            const accessToken = await getAccessTokenSilently();
             const messageAdminRequestModel: AdminMessageRequest = new AdminMessageRequest(id, response);
             const requestOptions = {
                 method: 'PUT',
                 headers: {
-                    Authorization: `Bearer ${authState?.accessToken?.accessToken}`,
+                    Authorization: `Bearer ${accessToken}`,
                     'Content-Type': 'application/json'
                 },
                 body: JSON.stringify(messageAdminRequestModel)

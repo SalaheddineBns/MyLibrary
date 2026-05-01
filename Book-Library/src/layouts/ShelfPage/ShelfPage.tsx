@@ -1,14 +1,9 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { HistoryPage } from "./components/HistoryPage";
 import { Loans } from "./components/Loans";
 
 export const ShelfPage = () => {
     const [historyClick,setHistoryClick]=useState(false)
-    
-    useEffect(()=>{
-            const response=fetch(`${process.env.REACT_APP_API}/books/secure/checkout/byuser`)
-            console.log(response)
-    },[])
 
 
     return (

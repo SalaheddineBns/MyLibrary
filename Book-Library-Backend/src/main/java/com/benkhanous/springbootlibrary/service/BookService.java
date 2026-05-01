@@ -10,8 +10,10 @@ import com.benkhanous.springbootlibrary.entity.History;
 import com.benkhanous.springbootlibrary.entity.Payment;
 import com.benkhanous.springbootlibrary.responsemodels.ShelfCurrentLoansResponse;
 import org.hibernate.annotations.Check;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.text.SimpleDateFormat;
 import java.time.LocalDate;
@@ -40,7 +42,7 @@ public class BookService {
         Optional<Book> book = bookRepository.findById(bookid);
         Checkout validateCheckout = checkoutRepository.findByUserEmailAndBookId(userEmail, bookid);// for verify if the book is already checked
         if (!book.isPresent() || validateCheckout != null || book.get().getCopiesAvailable() <= 0) {
-            throw new Exception("Book doesn't or is already checked by the user");
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Book doesn't exist or is already checked out by the user");
         }
         List<Checkout> currentBooksCheckout = checkoutRepository.findBooksByUserEmail(userEmail);
         SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
@@ -57,7 +59,7 @@ public class BookService {
         }
         Payment userPayment = paymentRepository.findByUserEmail(userEmail);
         if (userPayment != null && userPayment.getAmount() > 0 || (userPayment != null && bookNeedsReturned)) {
-            throw new Exception("Outstanding fees");
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Outstanding fees");
         }
         if (userPayment == null) {
             Payment payment = new Payment();

@@ -3,7 +3,7 @@ import ShelfCurrentloans from "../../../models/ShelfCurrentLoans";
 export const LoansModal: React.FC<{ shelfCurrentLoan: ShelfCurrentloans, mobile: boolean,returnBook:any,renewLoan:any }> = (props) => {
     return (
         <div className="modal fade" id={props.mobile ? `mobilemodal${props.shelfCurrentLoan.book.id}` : `modal${props.shelfCurrentLoan.book.id}`}
-            data-bs-backdrop='static' data-bs-keyboard='false' aria-aria-labelledby="staticBackdropLabel" aria-hidden='true' key={props.shelfCurrentLoan.book.id}
+            data-bs-backdrop='static' data-bs-keyboard='false' aria-labelledby="staticBackdropLabel" key={props.shelfCurrentLoan.book.id}
         >
             <div className='modal-dialog'>
                 <div className="modal-content">

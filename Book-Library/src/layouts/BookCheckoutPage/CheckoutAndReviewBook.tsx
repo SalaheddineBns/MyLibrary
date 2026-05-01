@@ -1,13 +1,15 @@
-import { Link } from "react-router-dom";
 import BookModel from "../../models/BookModel";
 import { LeaveAReview } from "../Utils/LeaveAReview";
+import { useAuth0 } from "@auth0/auth0-react";
 
 
 export const CheckoutAndReviewBook: React.FC<{
     book: BookModel | undefined, mobile: boolean, currentLoansCount: number,
     isAuthenticated: any, isCheckedOut: boolean, checkoutBook: any, isReviewLeft: Boolean,
-    submitReview:any
+    submitReview: any, checkoutError: string | null
 }> = (props) => {
+
+    const { loginWithRedirect } = useAuth0();
 
     const renderButton = () => {
 
@@ -22,13 +24,13 @@ export const CheckoutAndReviewBook: React.FC<{
                 return (<p className="text-danger">Too many books checked out.</p>)
             }
         }
-        return (<Link to={'/login'} className="btn btn-success btn-lg">Sign in</Link>)
+        return (<button onClick={() => loginWithRedirect()} className="btn btn-success btn-lg">Sign in</button>)
     }
 
     function reviewRender() {
         if (props.isAuthenticated && !props.isReviewLeft) {
             return (
-                <p><LeaveAReview submitReview={props.submitReview}/></p>
+                <div><LeaveAReview submitReview={props.submitReview}/></div>
             )
         } else if (props.isAuthenticated && props.isReviewLeft) {
             return (
@@ -70,6 +72,11 @@ export const CheckoutAndReviewBook: React.FC<{
                     </div>
                 </div>
                 {renderButton()}
+                {props.checkoutError &&
+                    <div className='alert alert-danger mt-2' role='alert'>
+                        {props.checkoutError}
+                    </div>
+                }
                 <hr />
                
                 <p className='mt-3'>

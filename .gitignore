@@ -2,6 +2,9 @@
 **/application-dev.properties
 **/application-prod.properties
 
+# Scripts SQL (données locales)
+Scripts/
+
 # Fichiers générés
 target/
 .idea/
@@ -23,3 +26,4 @@ out/
 **/.idea/
 **/*.iml
 out/
+

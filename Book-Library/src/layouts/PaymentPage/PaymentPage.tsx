@@ -1,4 +1,4 @@
-import { useOktaAuth } from "@okta/okta-react";
+import { useAuth0 } from "@auth0/auth0-react";
 import { CardElement, Elements, useElements, useStripe } from "@stripe/react-stripe-js";
 import { useEffect, useState } from "react";
 import { SpinnerLoading } from "../Utils/SpinnerLoading";
@@ -6,7 +6,7 @@ import { Link } from 'react-router-dom';
 import PaymentInfoRequest from "../../models/PaymentInfoRequest";
 
 export const PaymentPage = () => {
-    const { authState } = useOktaAuth();
+    const { isAuthenticated, getAccessTokenSilently, user } = useAuth0();
     const [httpError, setHttpError] = useState(false);
     const [submitDisabled, setSubmitDisabled] = useState(false);
     const [fees, setFees] = useState(0);
@@ -15,11 +15,15 @@ export const PaymentPage = () => {
 
     useEffect(() => {
         const fetchFees = async () => {
-            if (authState && authState.isAuthenticated) {
-                const url = `${process.env.REACT_APP_API}/payments/search/findByUserEmail?userEmail=${authState.accessToken?.claims.sub}`;
+            if (isAuthenticated) {
+                const accessToken = await getAccessTokenSilently();
+                const url = `${process.env.REACT_APP_API}/payments/search/findByUserEmail?userEmail=${user?.email}`;
                 const requestOptions = {
                     method: 'GET',
-                    headers: { 'Content-Type': 'application/json' }
+                    headers: {
+                        Authorization: `Bearer ${accessToken}`,
+                        'Content-Type': 'application/json'
+                    }
                 };
                 const paymentResponse = await fetch(url, requestOptions)
                 if (!paymentResponse.ok) {
@@ -36,7 +40,7 @@ export const PaymentPage = () => {
             setLoadingFees(false)
             setHttpError(error.message)
         })
-    }, [authState]);
+    }, [isAuthenticated]);
 
     const elements = useElements();
     const stripe = useStripe();
@@ -46,13 +50,14 @@ export const PaymentPage = () => {
             return;
         }
         setSubmitDisabled(true)
-        let paymentInfo = new PaymentInfoRequest(Math.round(fees * 100), 'USD', authState?.accessToken?.claims.sub)
+        const accessToken = await getAccessTokenSilently();
+        let paymentInfo = new PaymentInfoRequest(Math.round(fees * 100), 'USD', user?.email)
 
-        const url = `https://localhost:8443/api/payment/secure/payment-intent`;
+        const url = `${process.env.REACT_APP_API}/payment/secure/payment-intent`;
         const requestOptions = {
             method: 'POST',
             headers: {
-                Authorization: `Bearer ${authState?.accessToken?.accessToken}`,
+                Authorization: `Bearer ${accessToken}`,
                 'Content-type': 'application/json'
             },
             body: JSON.stringify(paymentInfo)
@@ -70,7 +75,7 @@ export const PaymentPage = () => {
                 payment_method: {
                     card: elements.getElement(CardElement)!,
                     billing_details: {
-                        email: authState?.accessToken?.claims.sub
+                        email: user?.email
                     }
                 }
             }, { handleActions: false }
@@ -80,11 +85,11 @@ export const PaymentPage = () => {
                 setSubmitDisabled(false)
                 alert('There was an error')
             } else {
-                const url = `https://localhost:8443/api/payment/secure/payment-complete`;
+                const url = `${process.env.REACT_APP_API}/payment/secure/payment-complete`;
                 const requestOptions = {
                     method: 'PUT',
                     headers: {
-                        Authorization: `Bearer ${authState?.accessToken?.accessToken}`,
+                        Authorization: `Bearer ${accessToken}`,
                         'Content-Type': 'application/json'
                     }
                 };

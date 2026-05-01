@@ -22,25 +22,27 @@ export const ReviewListPage = () => {
     useEffect(() => {
         console.log(window.location.pathname)
         const fetchBookReviews = async () => {
-            const reviewUrl: string = `${process.env.REAT_APP_API}/reviews/search/findByBookId?bookId=${bookId}&page=${currentPage - 1}&size=${reviewsPerPage}`
+            const reviewUrl: string = `${process.env.REACT_APP_API}/reviews/search/findByBookId?bookId=${bookId}&page=${currentPage - 1}&size=${reviewsPerPage}`
             const response = await fetch(reviewUrl)
             if (!response.ok) {
                 throw new Error('Something went wrong')
             }
             const responseJsonReviews = await response.json();
-            const responseData = responseJsonReviews._embedded.reviews;
             setTotalAmountOfReviews(responseJsonReviews.page.totalElements);
             setTotalPages(responseJsonReviews.page.totalPages);
-            const loadedReviews: ReviewModel[] = []
-            for (const key in responseData) {
-                loadedReviews.push({
-                    id: responseData[key].id,
-                    userEmail: responseData[key].userEmail,
-                    date: responseData[key].date,
-                    rating: responseData[key].rating,
-                    book_id: responseData[key].bookId,
-                    reviewDescription: responseData[key].reviewDescription,
-                });
+            const loadedReviews: ReviewModel[] = [];
+            if (responseJsonReviews._embedded?.reviews) {
+                const responseData = responseJsonReviews._embedded.reviews;
+                for (const key in responseData) {
+                    loadedReviews.push({
+                        id: responseData[key].id,
+                        userEmail: responseData[key].userEmail,
+                        date: responseData[key].date,
+                        rating: responseData[key].rating,
+                        book_id: responseData[key].bookId,
+                        reviewDescription: responseData[key].reviewDescription,
+                    });
+                }
             }
 
             setReviews(loadedReviews);
