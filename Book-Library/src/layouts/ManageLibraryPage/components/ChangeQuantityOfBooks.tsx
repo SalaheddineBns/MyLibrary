@@ -49,7 +49,7 @@ export const ChangeQuantityOfBooks = () => {
             setHttpError(error.message);
         })
 
-    }, [currentPage,bookdelete])
+    }, [currentPage, bookdelete, booksPerPage])
 
     const indexOfLastBook: number = currentPage * booksPerPage;
     const indexOfFirstBook: number = indexOfLastBook - booksPerPage;

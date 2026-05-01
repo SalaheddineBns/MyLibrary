@@ -14,7 +14,7 @@ export const ChangeQuantityOfBook: React.FC<{ book: BookModel, deleteBook: any }
             props.book.copiesAvailable ? setRemaining(props.book.copiesAvailable) : setRemaining(0);
         };
         fetchBookInState();
-    }, []);
+    }, [props.book.copies, props.book.copiesAvailable]);
 
     async function increaseQuantity() {
         const url = `${process.env.REACT_APP_API}/admin/secure/increase/book/quantity?bookId=${props.book?.id}`;
