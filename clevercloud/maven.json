@@ -1,0 +1,6 @@
+{
+  "build": {
+    "type": "maven",
+    "goal": "package -DskipTests"
+  }
+}
