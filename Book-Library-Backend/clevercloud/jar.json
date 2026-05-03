@@ -1,0 +1,5 @@
+{
+  "deploy": {
+    "jarName": "./target/spring-boot-library-0.0.1-SNAPSHOT"
+  }
+}
